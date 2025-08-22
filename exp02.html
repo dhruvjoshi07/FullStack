@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Responsive Banking UI</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .banking-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  .balance {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #2d7a2d;
+  }
+  .input-group {
+    display: flex;
+    margin-bottom: 1.5rem;
+  }
+  input[type="number"] {
+    flex-grow: 1;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    border: 2px solid #ddd;
+    border-radius: 6px 0 0 6px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  input[type="number"]:focus {
+    border-color: #2d7a2d;
+  }
+  button {
+    background: #2d7a2d;
+    color: white;
+    border: none;
+    padding: 0 1.5rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 0 6px 6px 0;
+    transition: background 0.3s;
+  }
+  button:hover:not(:disabled) {
+    background: #246624;
+  }
+  button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+  .actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  .actions button {
+    flex: 1;
+    border-radius: 6px;
+    padding: 0.75rem 0;
+  }
+  @media (max-width: 480px) {
+    .input-group {
+      flex-direction: column;
+    }
+    input[type="number"] {
+      border-radius: 6px 6px 0 0;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      border-radius: 0 0 6px 6px;
+      padding: 0.75rem;
+    }
+    .actions {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .actions button {
+      flex: unset;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="banking-container" role="main" aria-label="Banking interface">
+    <h1>My Bank</h1>
+    <div class="balance" aria-live="polite" aria-atomic="true">
+      Balance: $<span id="balance">0.00</span>
+    </div>
+    <div class="input-group">
+      <input
+        id="amount"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="Enter amount"
+        aria-label="Amount to deposit or withdraw"
+      />
+      <button id="depositBtn" aria-describedby="amount">Deposit</button>
+    </div>
+    <div class="actions">
+      <button id="withdrawBtn" aria-describedby="amount">Withdraw</button>
+    </div>
+  </div>
+
+  <script>
+    const balanceEl = document.getElementById('balance');
+    const amountInput = document.getElementById('amount');
+    const depositBtn = document.getElementById('depositBtn');
+    const withdrawBtn = document.getElementById('withdrawBtn');
+
+    let balance = 0;
+
+    function updateBalance() {
+      balanceEl.textContent = balance.toFixed(2);
+    }
+
+    function getAmount() {
+      return parseFloat(amountInput.value);
+    }
+
+    function validateAmount() {
+      const amount = getAmount();
+      if (isNaN(amount) || amount <= 0) return false;
+      return true;
+    }
+
+    function updateButtons() {
+      const valid = validateAmount();
+      depositBtn.disabled = !valid;
+      withdrawBtn.disabled = !valid || getAmount() > balance;
+    }
+
+    amountInput.addEventListener('input', () => {
+      updateButtons();
+    });
+
+    depositBtn.addEventListener('click', () => {
+      if (!validateAmount()) return;
+      balance += getAmount();
+      updateBalance();
+      amountInput.value = '';
+      updateButtons();
+    });
+
+    withdrawBtn.addEventListener('click', () => {
+      if (!validateAmount()) return;
+      const amount = getAmount();
+      if (amount <= balance) {
+        balance -= amount;
+        updateBalance();
+      } else {
+        alert('Insufficient balance!');
+      }
+      amountInput.value = '';
+      updateButtons();
+    });
+
+    // Initialize buttons state
+    updateButtons();
+  </script>
+</body>
+</html>
